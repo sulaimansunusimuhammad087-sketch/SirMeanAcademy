@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sir Mean Academy - Portal</title>
+    <style>
+        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); width: 100%; max-width: 400px; }
+        h2, h3 { margin-top: 0; color: #1a1a1a; text-align: center; }
+        input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        input:focus { border-color: #007bff; outline: none; }
+        button { width: 100%; padding: 12px; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px; transition: background 0.2s; }
+        .btn-primary { background-color: #007bff; color: white; }
+        .btn-primary:hover { background-color: #0056b3; }
+        .btn-secondary { background-color: #28a745; color: white; }
+        .btn-secondary:hover { background-color: #1e7e34; }
+        .btn-danger { background-color: #dc3545; color: white; }
+        .btn-danger:hover { background-color: #bd2130; }
+        .hidden { display: none; }
+        .status-badge { background: #e2f0d9; color: #385723; padding: 6px; border-radius: 4px; text-align: center; font-size: 13px; font-weight: bold; margin-bottom: 15px; }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <div id="auth-view">
+            <h2>Sir Mean Academy</h2>
+            <h3>Sign In / Register</h3>
+            <input type="email" id="email" placeholder="Email Address">
+            <input type="password" id="password" placeholder="Password">
+            <button id="login-btn" class="btn-primary">Log In</button>
+            <button id="register-btn" class="btn-secondary">Create Student Account</button>
+        </div>
+
+        <div id="dashboard-view" class="hidden">
+            <h2>Student Dashboard</h2>
+            <div class="status-badge">Connected Securely</div>
+            <p>Welcome! You are logged into your portal.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            
+            <h3>Submit Study Topic</h3>
+            <input type="text" id="topic-input" placeholder="e.g., Statistics Level 200 Note">
+            <button id="submit-btn" class="btn-primary">Save to Database</button>
+            
+            <button id="logout-btn" class="btn-danger" style="margin-top: 30px;">Log Out</button>
+        </div>
+    </div>
+
+    <script type="module" src="app.js"></script>
+</body>
+</html>
