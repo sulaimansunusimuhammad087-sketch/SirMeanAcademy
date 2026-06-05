@@ -3,237 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sir Mean School - Global Academy</title>
-
-    <script type="importmap">
-      {
-        "imports": {
-          "react": "https://esm.sh/react@18.2.0",
-          "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-          "firebase/app": "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js",
-          "firebase/auth": "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js",
-          "firebase/firestore": "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"
-        }
-      }
-    </script>
-
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>Sir Mean Academy | Professional Instructor Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #07040f;">
+<body class="bg-slate-900 text-slate-100 font-sans antialiased hidden-scrollbar">
 
-    <div id="root"></div>
-
-    <script type="text/babel" data-type="module">
-        import React, { useState, useRef, useEffect } from "react";
-        import ReactDOM from "react-dom/client";
-        import { initializeApp } from "firebase/app";
-        import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "firebase/auth";
-        import { getFirestore, collection, onSnapshot, addDoc, query, orderBy, serverTimestamp, doc, setDoc, getDoc } from "firebase/firestore";
-
-        // ─── Firebase Configuration ──────────────────────────────────────────
-        const firebaseConfig = {
-          apiKey: "AIzaSyBen1RjWtmaOE2Ec3LbQvldBvCVaTzYJWk",
-          authDomain: "sirmeanacademy-14b84.firebaseapp.com",
-          projectId: "sirmeanacademy-14b84",
-          storageBucket: "sirmeanacademy-14b84.firebasestorage.app",
-          messagingSenderId: "3897951834",
-          appId: "1:3897951834:web:154b0d93abdf8ffc32ba63"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Render Utility for Math formulas
-        const renderLatex = (text) => {
-          if (!text) return "";
-          const parts = text.split(/(\$[^$]+\$)/g);
-          return parts.map((part, i) => {
-            if (part.startsWith("$") && part.endsWith("$")) {
-              const eq = part.slice(1, -1);
-              return <span key={i} style={{ fontFamily: "'Times New Roman', serif", fontStyle: "italic", color: "#a78bfa" }}>{eq}</span>;
-            }
-            return <span key={i}>{part}</span>;
-          });
-        };
-
-        function EduLivePro() {
-          const [currentUser, setCurrentUser] = useState(null);
-          const [authEmail, setAuthEmail] = useState("");
-          const [authPassword, setAuthPassword] = useState("");
-          const [isRegistering, setIsRegistering] = useState(false);
-          const [activeTab, setActiveTab] = useState("dashboard");
-          const [courses, setCourses] = useState([]);
-          const [chatMessages, setChatMessages] = useState([]);
-          const [chatInput, setChatInput] = useState("");
-          const [newCourseTitle, setNewCourseTitle] = useState("");
-          const [newCourseCategory, setNewCourseCategory] = useState("Mathematics");
-          const [mathInput, setMathInput] = useState("$f(x) = \\frac{d}{dx}[x^2 + 3x + 5]$");
-          const [roomId, setRoomId] = useState("");
-          const [isLive, setIsLive] = useState(false);
-          const canvasRef = useRef(null);
-
-          useEffect(() => {
-            return onAuthStateChanged(auth, (user) => setCurrentUser(user));
-          }, []);
-
-          useEffect(() => {
-            if (!currentUser) return;
-            return onSnapshot(collection(db, "courses"), (snapshot) => {
-              const list = [];
-              snapshot.forEach(doc => list.push({ id: doc.id, ...doc.data() }));
-              setCourses(list);
-            });
-          }, [currentUser]);
-
-          useEffect(() => {
-            if (!currentUser) return;
-            const q = query(collection(db, "global_chat"), orderBy("createdAt", "asc"));
-            return onSnapshot(q, (snapshot) => {
-              const msgs = [];
-              snapshot.forEach(doc => msgs.push({ id: doc.id, ...doc.data() }));
-              setChatMessages(msgs);
-            });
-          }, [currentUser]);
-
-          const handleAuth = async (e) => {
-            e.preventDefault();
-            try {
-              if (isRegistering) {
-                await createUserWithEmailAndPassword(auth, authEmail, authPassword);
-              } else {
-                await signInWithEmailAndPassword(auth, authEmail, authPassword);
-              }
-            } catch (err) { alert(err.message); }
-          };
-
-          const handleCreateCourse = async (e) => {
-            e.preventDefault();
-            if (!newCourseTitle.trim()) return;
-            await addDoc(collection(db, "courses"), {
-              title: newCourseTitle.trim(),
-              category: newCourseCategory,
-              instructor: currentUser.email,
-              createdAt: serverTimestamp()
-            });
-            setNewCourseTitle("");
-          };
-
-          const sendChat = async () => {
-            if (!chatInput.trim()) return;
-            await addDoc(collection(db, "global_chat"), {
-              user: currentUser.email,
-              msg: chatInput.trim(),
-              createdAt: serverTimestamp()
-            });
-            setChatInput("");
-          };
-
-          if (!currentUser) {
-            return (
-              <div style={{ display: "flex", height: "100vh", alignItems: "center", justifyContent: "center", fontFamily: "sans-serif" }}>
-                <div style={{ background: "#0d0720", padding: 40, borderRadius: 16, width: 320, border: "1px solid #3b1d6e" }}>
-                  <h2 style={{ color: "#a78bfa", textAlign: "center" }}>Sir Mean School</h2>
-                  <form onSubmit={handleAuth} style={{ marginTop: 20 }}>
-                    <input type="email" placeholder="Email" value={authEmail} onChange={e => setAuthEmail(e.target.value)} style={{ width: "100%", padding: 10, marginBottom: 10, background: "#1b113a", border: "1px solid #3b1d6e", color: "#fff", borderRadius: 6 }} />
-                    <input type="password" placeholder="Password" value={authPassword} onChange={e => setAuthPassword(e.target.value)} style={{ width: "100%", padding: 10, marginBottom: 20, background: "#1b113a", border: "1px solid #3b1d6e", color: "#fff", borderRadius: 6 }} />
-                    <button type="submit" style={{ width: "100%", padding: 10, background: "#7c3aed", color: "#fff", border: "none", borderRadius: 6, fontWeight: "bold" }}>
-                      {isRegistering ? "Register" : "Login"}
-                    </button>
-                  </form>
-                  <button onClick={() => setIsRegistering(!isRegistering)} style={{ background: "transparent", border: "none", color: "#a78bfa", marginTop: 15, width: "100%" }}>
-                    {isRegistering ? "Switch to Login" : "Switch to Register"}
-                  </button>
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between hidden md:flex">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
+                        <i class="fa-solid fa-graduation-cap text-xl"></i>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-lg leading-tight">Sir Mean</h2>
+                        <span class="text-xs text-blue-400 font-medium">Academy HQ</span>
+                    </div>
                 </div>
-              </div>
-            );
-          }
-
-          return (
-            <div style={{ display: "flex", height: "100vh", fontFamily: "sans-serif" }}>
-              <aside style={{ width: 200, background: "#0d0720", padding: 20, borderRight: "1px solid #222" }}>
-                <h3 style={{ color: "#a78bfa" }}>Sir Mean Hub</h3>
-                <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 20 }}>
-                  <button onClick={() => setActiveTab("dashboard")} style={{ padding: 10, background: activeTab === "dashboard" ? "#7c3aed" : "transparent", color: "#fff", border: "none", textAlign: "left", borderRadius: 6 }}>Dashboard</button>
-                  <button onClick={() => setActiveTab("live")} style={{ padding: 10, background: activeTab === "live" ? "#7c3aed" : "transparent", color: "#fff", border: "none", textAlign: "left", borderRadius: 6 }}>Live Room</button>
-                  <button onClick={() => setActiveTab("math")} style={{ padding: 10, background: activeTab === "math" ? "#7c3aed" : "transparent", color: "#fff", border: "none", textAlign: "left", borderRadius: 6 }}>Math Matrix</button>
-                  <button onClick={() => setActiveTab("courses")} style={{ padding: 10, background: activeTab === "courses" ? "#7c3aed" : "transparent", color: "#fff", border: "none", textAlign: "left", borderRadius: 6 }}>Courses Portal</button>
-                </div>
-                <button onClick={() => signOut(auth)} style={{ marginTop: 40, width: "100%", padding: 8, background: "#dc2626", color: "#fff", border: "none", borderRadius: 6 }}>Log Out</button>
-              </aside>
-
-              <main style={{ flex: 1, padding: 30, overflowY: "auto" }}>
-                {activeTab === "dashboard" && (
-                  <div>
-                    <h1>Workspace Dashboard</h1>
-                    <p style={{ color: "#7a6a9a" }}>Logged in as: {currentUser.email}</p>
-                  </div>
-                )}
-
-                {activeTab === "live" && (
-                  <div>
-                    <h2>Live Classroom Stream Setup</h2>
-                    <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: 20, marginTop: 15 }}>
-                      <div style={{ background: "#0d0720", height: 300, borderRadius: 8, padding: 20 }}>
-                        <p>Stream Camera Feed Node Window</p>
-                        <button onClick={() => setIsLive(!isLive)} style={{ padding: 10, background: isLive ? "#dc2626" : "#059669", color: "#fff", border: "none", borderRadius: 6 }}>
-                          {isLive ? "End Stream Session" : "Start Live Broadcast"}
-                        </button>
-                      </div>
-                      <div style={{ background: "#0d0720", borderRadius: 8, display: "flex", flexDirection: "column", height: 300 }}>
-                        <div style={{ flex: 1, padding: 10, overflowY: "auto", fontSize: 13 }}>
-                          {chatMessages.map(m => (
-                            <div key={m.id} style={{ marginBottom: 5 }}><strong style={{ color: "#a78bfa" }}>{m.user?.split("@")[0]}:</strong> {renderLatex(m.msg)}</div>
-                          ))}
-                        </div>
-                        <div style={{ padding: 10, borderTop: "1px solid #222", display: "flex", gap: 5 }}>
-                          <input value={chatInput} onChange={e => setChatInput(e.target.value)} onKeyDown={e => e.key === "Enter" && sendChat()} style={{ flex: 1, background: "#1b113a", border: "none", padding: 8, color: "#fff" }} placeholder="Type message..." />
-                          <button onClick={sendChat} style={{ background: "#7c3aed", color: "#fff", border: "none", padding: "8px 12px" }}>Send</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "math" && (
-                  <div>
-                    <h2>LaTeX Formulation Editor</h2>
-                    <textarea value={mathInput} onChange={e => setMathInput(e.target.value)} style={{ width: "100%", height: 80, background: "#0d0720", color: "#fff", border: "1px solid #3b1d6e", marginTop: 15, padding: 10 }} />
-                    <div style={{ marginTop: 15, padding: 20, background: "#0d0720", borderRadius: 6 }}>
-                      <h4>Compiled Preview Output:</h4>
-                      <div style={{ fontSize: 18, marginTop: 10 }}>{renderLatex(mathInput)}</div>
-                    </div>
-                  </div>
-                )}
-
-                {activeTab === "courses" && (
-                  <div>
-                    <h2>Course Management Hub</h2>
-                    <form onSubmit={handleCreateCourse} style={{ display: "flex", gap: 10, marginTop: 15 }}>
-                      <input type="text" placeholder="Course Title..." value={newCourseTitle} onChange={e => setNewCourseTitle(e.target.value)} style={{ flex: 1, padding: 10, background: "#0d0720", color: "#fff", border: "1px solid #3b1d6e" }} />
-                      <select value={newCourseCategory} onChange={e => setNewCourseCategory(e.target.value)} style={{ background: "#0d0720", color: "#fff", border: "1px solid #3b1d6e", padding: 10 }}>
-                        <option value="Mathematics">Mathematics</option>
-                        <option value="Statistics">Statistics</option>
-                        <option value="Data Science">Data Science</option>
-                      </select>
-                      <button type="submit" style={{ padding: "10px 20px", background: "#7c3aed", color: "#fff", border: "none" }}>Add Row</button>
-                    </form>
-                    <div style={{ marginTop: 20 }}>
-                      {courses.map(c => (
-                        <div key={c.id} style={{ background: "#0d0720", padding: 12, borderRadius: 6, marginBottom: 8 }}>
-                          <strong>{c.title}</strong> - <span style={{ color: "#a78bfa" }}>{c.category}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </main>
+                <nav class="space-y-1.5">
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-600/10 text-blue-400 rounded-xl font-medium transition-all"><i class="fa-solid fa-chalkboard-user"></i> Virtual Classroom</a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-book"></i> Courses & Modules</a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-users"></i> Student Roster</a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
+                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-gear"></i> Settings</a>
+                </nav>
             </div>
-          );
-        }
+            <div class="p-4 border-t border-slate-800 bg-slate-950/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow">SM</div>
+                    <div>
+                        <p class="text-sm font-semibold">Sir Mean</p>
+                        <p class="text-xs text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span> Host Account</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
 
-        const root = ReactDOM.createRoot(document.getElementById("root"));
-        root.render(<EduLivePro />);
-    </script>
+        <main class="flex-1 flex flex-col min-w-0 bg-slate-900">
+            <header class="h-16 bg-slate-950/40 backdrop-blur-md border-b border-slate-800/60 px-6 flex items-center justify-between z-10">
+                <div class="flex items-center gap-4">
+                    <h1 class="text-lg font-semibold tracking-tight">Advanced Calculus: Integration Theory</h1>
+                    <span class="bg-red-500/10 text-red-400 text-xs px-2.5 py-1 rounded-full border border-red-500/20 font-medium flex items-center gap-1.5 animate-pulse">
+                        <span class="w-2 h-2 rounded-full bg-red-500"></span> LIVE
+                    </span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right text-xs hidden sm:block">
+                        <p class="text-slate-400">Classroom Code</p>
+                        <p class="font-mono font-bold text-blue-400">SMA-9482-XYZ</p>
+                    </div>
+                </div>
+            </header>
+
+            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+                
+                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                    <div class="xl:col-span-2 space-y-6">
+                        
+                        <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl relative group">
+                            <div class="aspect-video w-full bg-slate-950 flex items-center justify-center relative">
+                                <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"></video>
+                                <div id="videoPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-300">
+                                    <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-3 text-xl">
+                                        <i class="fa-solid fa-video-slash"></i>
+                                    </div>
+                                    <p class="text-sm text-slate-400">Your camera stream is currently offline</p>
+                                </div>
+                            </div>
+                            <div class="p-4 bg-slate-950/80 border-t border-slate-800 flex justify-between items-center">
+                                <div class="flex items-center gap-2">
+                                    <button id="start-stream" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-2"><i class="fa-solid fa-video"></i> Start Cam</button>
+                                    <button id="share-screen" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center gap-2"><i class="fa-solid fa-desktop"></i> Share Screen</button>
+                                    <button id="stop-stream" class="px-4 py-2 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-xl text-xs font-semibold border border-red-500/30 transition flex items-center gap-2"><i class="fa-solid fa-circle-stop"></i> Stop</button>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button id="start-record" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 text-xs shadow-sm" title="Record Session"><i class="fa-solid fa-circle text-red-500 mr-1 animate-pulse"></i> Record</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 rounded-2xl border border-slate-800 p-5 shadow-xl">
+                            <div class="flex justify-between items-center mb-4">
+                                <div class="flex items-center gap-2">
+                                    <i class="fa-solid fa-pen-ruler text-blue-500"></i>
+                                    <h3 class="font-semibold text-sm">Interactive Workspace / Canvas</h3>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <input type="color" id="brush-color" class="w-6 h-6 rounded bg-transparent border-0 cursor-pointer" value="#3b82f6">
+                                    <input type="range" id="brush-size" min="1" max="15" value="3" class="w-16 accent-blue-500">
+                                    <button id="clear-board" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs rounded-lg transition">Clear All</button>
+                                </div>
+                            </div>
+                            <div class="relative bg-white rounded-xl overflow-hidden">
+                                <canvas id="whiteboard" class="w-full block"></canvas>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="space-y-6">
+                        
+                        <div class="bg-slate-950 rounded-2xl border border-slate-800 flex flex-col h-[480px] shadow-xl">
+                            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
+                                <h3 class="font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-comments text-blue-500"></i> Student Live Feed</h3>
+                                <span class="bg-slate-900 text-slate-400 text-[10px] font-mono px-2 py-0.5 rounded border border-slate-800">LaTeX Safe</span>
+                            </div>
+                            <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar text-sm">
+                                </div>
+                            <div class="p-3 border-t border-slate-800 bg-slate-950/60">
+                                <div class="flex gap-2">
+                                    <input type="text" id="chat-input" placeholder="Type message or standard LaTeX..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 placeholder-slate-500 transition">
+                                    <button id="send-btn" class="bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center justify-center shadow-lg shadow-blue-500/20"><i class="fa-solid fa-paper-plane"></i></button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 rounded-2xl border border-slate-800 p-5 shadow-xl">
+                            <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-folder-open text-amber-500"></i> Cloud Resources & Syllabus</h3>
+                            <label class="border-2 border-dashed border-slate-800 hover:border-blue-500/50 bg-slate-900/40 hover:bg-slate-900/70 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition group mb-4">
+                                <input type="file" id="file-uploader" class="hidden" accept=".pdf,.doc,.docx,image/*">
+                                <i class="fa-solid fa-cloud-arrow-up text-slate-500 group-hover:text-blue-400 text-lg transition"></i>
+                                <span class="text-xs text-slate-400 group-hover:text-slate-300 transition">Drop files here or browse folder</span>
+                            </label>
+                            <ul id="file-list" class="space-y-2 text-xs max-h-40 overflow-y-auto custom-scrollbar">
+                                </ul>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl"><i class="fa-solid fa-chart-line"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400">Class Participation</p>
+                            <h4 class="text-2xl font-bold tracking-tight">94.2%</h4>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl"><i class="fa-solid fa-hourglass-half"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400">Recorded Hours Today</p>
+                            <h4 class="text-2xl font-bold tracking-tight">2.4 hrs</h4>
+                        </div>
+                    </div>
+                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl"><i class="fa-solid fa-user-check"></i></div>
+                        <div>
+                            <p class="text-xs text-slate-400">Active Hand Raises</p>
+                            <h4 class="text-2xl font-bold tracking-tight">0</h4>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <script type="module" src="app.js"></script>
 </body>
 </html>
