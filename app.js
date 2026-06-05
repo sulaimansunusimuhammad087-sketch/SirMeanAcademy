@@ -1,9 +1,27 @@
-// Destructure React Hooks from the global React object
-const { useState, useRef, useEffect, useCallback } = React;
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import ReactDOM from "react-dom/client";
 
-// Destructure Firebase modules from globally loaded windows (Firebase v9+ CDN style uses global compat or production window pointers)
-// Since we are running native browser scripts, we pull directly from the window or explicit CDN modules.
-// Below, we initialize Firebase using the direct scripts or fallback initialization.
+// Import Firebase SDK modules safely using mapped browser targets
+import { initializeApp } from "firebase/app";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  createUserWithEmailAndPassword, 
+  signOut, 
+  onAuthStateChanged 
+} from "firebase/auth";
+import { 
+  getFirestore, 
+  collection, 
+  addDoc, 
+  onSnapshot, 
+  query, 
+  orderBy, 
+  serverTimestamp, 
+  doc, 
+  setDoc, 
+  getDoc 
+} from "firebase/firestore";
 
 // ─── Firebase Configuration ──────────────────────────────────────────────────
 const firebaseConfig = {
@@ -14,11 +32,6 @@ const firebaseConfig = {
   messagingSenderId: "3897951834",
   appId: "1:3897951834:web:154b0d93abdf8ffc32ba63"
 };
-
-// If using ES modules in browser with import maps or importing directly via unpkg:
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // Initialize Services
 const app = initializeApp(firebaseConfig);
@@ -67,7 +80,7 @@ const renderLatex = (text) => {
   });
 };
 
-function EduLivePro() {
+export default function EduLivePro() {
   // ─── Authentication & User States ─────────────────────────────────────────
   const [currentUser, setCurrentUser] = useState(null);
   const [authEmail, setAuthEmail] = useState("");
@@ -581,6 +594,7 @@ function EduLivePro() {
   );
 }
 
-// Render the component into the HTML DOM root element
-const root = SiegelReactDOM.createRoot(document.getElementById('root'));
+// Global initialization for the React app using the mapping endpoint
+const container = document.getElementById("root");
+const root = ReactDOM.createRoot(container);
 root.render(<EduLivePro />);
