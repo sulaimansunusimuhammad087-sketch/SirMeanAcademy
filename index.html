@@ -3,172 +3,366 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sir Mean Academy | Professional Instructor Dashboard</title>
+    <title>Sir Mean School — Advanced Class Control Ecosystem</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap');
+        
+        body { font-family: 'DM Sans', 'Segoe UI', sans-serif; }
+        .heading-font { font-family: 'Syne', sans-serif; }
+        
+        /* Custom UI Microscrollbars */
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #07040f; }
+        ::-webkit-scrollbar-thumb { background: #1e1233; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3b1d6e; }
+        
+        /* Canvas Workspace Rules */
+        canvas { touch-action: none; cursor: crosshair; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 font-sans antialiased hidden-scrollbar">
+<body class="bg-[#07040f] text-[#e2d9f3] min-h-screen overflow-hidden flex flex-col relative">
 
-    <div class="flex h-screen overflow-hidden">
-        <aside class="w-64 bg-slate-950 border-r border-slate-800 flex flex-col justify-between hidden md:flex">
-            <div class="p-6">
-                <div class="flex items-center gap-3 mb-8">
-                    <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
-                        <i class="fa-solid fa-graduation-cap text-xl"></i>
-                    </div>
-                    <div>
-                        <h2 class="font-bold text-lg leading-tight">Sir Mean</h2>
-                        <span class="text-xs text-blue-400 font-medium">Academy HQ</span>
-                    </div>
-                </div>
-                <nav class="space-y-1.5">
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 bg-blue-600/10 text-blue-400 rounded-xl font-medium transition-all"><i class="fa-solid fa-chalkboard-user"></i> Virtual Classroom</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-book"></i> Courses & Modules</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-users"></i> Student Roster</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-chart-pie"></i> Analytics</a>
-                    <a href="#" class="flex items-center gap-3 px-4 py-3 text-slate-400 hover:bg-slate-900 hover:text-slate-200 rounded-xl transition-all"><i class="fa-solid fa-gear"></i> Settings</a>
-                </nav>
+    <div id="toast-container" class="fixed top-6 right-6 z-[9999] space-y-3 pointer-events-none"></div>
+
+    <div id="view-auth" class="w-full min-h-screen flex items-center justify-center p-4">
+        <div class="w-full max-w-md">
+            <div class="text-center mb-8">
+                <h1 class="heading-font font-extrabold text-4xl bg-gradient-to-r from-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">Sir Mean School</h1>
+                <p class="text-xs text-[#6b5a8a] mt-2 tracking-widest font-semibold uppercase">Advanced Analytical Learning Platform</p>
             </div>
-            <div class="p-4 border-t border-slate-800 bg-slate-950/50">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 flex items-center justify-center font-bold text-white shadow">SM</div>
+            
+            <div class="bg-[#0d0720] border border-purple-900/30 rounded-2xl p-8 shadow-2xl">
+                <div class="flex bg-purple-950/20 rounded-xl p-1 mb-6 border border-purple-950/40">
+                    <button id="auth-tab-login" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-white bg-purple-600/40">Sign In</button>
+                    <button id="auth-tab-register" class="flex-1 py-2 text-xs font-bold rounded-lg transition-all text-[#7a6a9a]">Create Account</button>
+                </div>
+
+                <div id="register-fields" class="hidden space-y-4 mb-4">
                     <div>
-                        <p class="text-sm font-semibold">Sir Mean</p>
-                        <p class="text-xs text-emerald-400 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span> Host Account</p>
+                        <label class="block text-xs font-bold text-[#a78bfa] mb-1.5">Full Name</label>
+                        <input id="auth-name" type="text" placeholder="Sir Mean Developer" class="w-full bg-purple-950/10 border border-purple-900/20 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-all">
                     </div>
                 </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold text-[#a78bfa] mb-1.5">Email Address</label>
+                        <input id="auth-email" type="email" placeholder="you@example.com" class="w-full bg-purple-950/10 border border-purple-900/20 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-all">
+                    </div>
+                    <div class="mb-6">
+                        <label class="block text-xs font-bold text-[#a78bfa] mb-1.5">Password</label>
+                        <input id="auth-password" type="password" placeholder="••••••••" class="w-full bg-purple-950/10 border border-purple-900/20 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-purple-500 transition-all">
+                    </div>
+                    
+                    <div id="role-selector-container" class="hidden mb-6">
+                        <label class="block text-xs font-bold text-[#a78bfa] mb-2">Join Classroom Ecosystem As</label>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button id="role-student" data-role="student" class="py-2.5 rounded-xl border border-purple-500 text-white bg-purple-600/30 text-xs font-bold flex items-center justify-center gap-2">
+                                👨‍🎓 Student
+                            </button>
+                            <button id="role-host" data-role="host" class="py-2.5 rounded-xl border border-purple-900/20 text-[#7a6a9a] bg-purple-950/10 text-xs font-bold flex items-center justify-center gap-2">
+                                👨‍🏫 Teacher / Host
+                            </button>
+                        </div>
+                    </div>
+
+                    <button id="auth-submit-btn" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] text-white font-bold text-sm shadow-lg shadow-purple-900/40 hover:brightness-110 active:scale-[0.99] transition-all">
+                        Sign In →
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-app" class="w-full h-screen hidden flex overflow-hidden">
+        
+        <aside class="w-64 bg-[#0d0720] border-r border-purple-900/15 flex flex-col flex-shrink-0">
+            <div class="p-5 border-b border-purple-900/10">
+                <h2 class="heading-font font-extrabold text-xl bg-gradient-to-r from-[#a78bfa] to-[#f472b6] bg-clip-text text-transparent">Sir Mean School</h2>
+                <p class="text-[10px] text-[#6b5a8a] tracking-wider font-semibold mt-0.5 uppercase">Unified Enterprise Engine</p>
+            </div>
+            
+            <nav class="flex-1 py-4 overflow-y-auto space-y-1">
+                <button data-tab="dashboard" class="tab-btn w-full px-5 py-3 flex items-center gap-3 text-sm transition-all text-[#a78bfa] font-semibold bg-purple-600/10 border-l-4 border-[#7c3aed]">
+                    <i class="fa-solid fa-chart-pie w-5"></i> Dashboard
+                </button>
+                <button data-tab="scheduler" class="tab-btn w-full px-5 py-3 flex items-center gap-3 text-sm transition-all text-[#7a6a9a] hover:bg-purple-950/10 border-l-4 border-transparent">
+                    <i class="fa-solid fa-calendar-days w-5"></i> Class Scheduler
+                </button>
+                <button data-tab="live" class="tab-btn w-full px-5 py-3 flex items-center gap-3 text-sm transition-all text-[#7a6a9a] hover:bg-purple-950/10 border-l-4 border-transparent">
+                    <i class="fa-solid fa-video w-5"></i> Live Stream Classroom
+                </button>
+                <button data-tab="whiteboard" class="tab-btn w-full px-5 py-3 flex items-center gap-3 text-sm transition-all text-[#7a6a9a] hover:bg-purple-950/10 border-l-4 border-transparent">
+                    <i class="fa-solid fa-chalkboard w-5"></i> Interactive Board
+                </button>
+                <button data-tab="math-editor" class="tab-btn w-full px-5 py-3 flex items-center gap-3 text-sm transition-all text-[#7a6a9a] hover:bg-purple-950/10 border-l-4 border-transparent">
+                    <i class="fa-solid fa-square-root-variable w-5"></i> Statistics / Math LaTeX
+                </button>
+            </nav>
+
+            <div class="p-4 border-t border-purple-900/10 bg-[#07040f]/50">
+                <div class="flex items-center gap-3 mb-3">
+                    <div id="user-avatar" class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#7c3aed] to-[#a78bfa] flex items-center justify-center font-bold text-xs text-white">SM</div>
+                    <div class="truncate">
+                        <div id="user-display-name" class="text-xs font-bold text-white flex items-center gap-1">Guest Engine</div>
+                        <div id="user-display-role" class="text-[10px] text-[#6b5a8a] uppercase font-semibold tracking-wider">Student Profile</div>
+                    </div>
+                </div>
+                <button id="app-signout" class="w-full py-2 rounded-xl bg-red-950/20 border border-red-900/30 text-red-400 text-xs font-medium flex items-center justify-center gap-2 hover:bg-red-950/40 transition-all">
+                    <i class="fa-solid fa-right-from-bracket"></i> Disconnect Session
+                </button>
             </div>
         </aside>
 
-        <main class="flex-1 flex flex-col min-w-0 bg-slate-900">
-            <header class="h-16 bg-slate-950/40 backdrop-blur-md border-b border-slate-800/60 px-6 flex items-center justify-between z-10">
-                <div class="flex items-center gap-4">
-                    <h1 class="text-lg font-semibold tracking-tight">Advanced Calculus: Integration Theory</h1>
-                    <span class="bg-red-500/10 text-red-400 text-xs px-2.5 py-1 rounded-full border border-red-500/20 font-medium flex items-center gap-1.5 animate-pulse">
-                        <span class="w-2 h-2 rounded-full bg-red-500"></span> LIVE
-                    </span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <div class="text-right text-xs hidden sm:block">
-                        <p class="text-slate-400">Classroom Code</p>
-                        <p class="font-mono font-bold text-blue-400">SMA-9482-XYZ</p>
-                    </div>
-                </div>
-            </header>
-
-            <div class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
-                
-                <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
-                    <div class="xl:col-span-2 space-y-6">
-                        
-                        <div class="bg-slate-950 rounded-2xl border border-slate-800 overflow-hidden shadow-2xl relative group">
-                            <div class="aspect-video w-full bg-slate-950 flex items-center justify-center relative">
-                                <video id="localVideo" autoplay playsinline muted class="w-full h-full object-cover rounded-2xl transform scale-x-[-1]"></video>
-                                <div id="videoPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-950 transition-opacity duration-300">
-                                    <div class="w-16 h-16 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-600 mb-3 text-xl">
-                                        <i class="fa-solid fa-video-slash"></i>
-                                    </div>
-                                    <p class="text-sm text-slate-400">Your camera stream is currently offline</p>
-                                </div>
-                            </div>
-                            <div class="p-4 bg-slate-950/80 border-t border-slate-800 flex justify-between items-center">
-                                <div class="flex items-center gap-2">
-                                    <button id="start-stream" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold shadow transition flex items-center gap-2"><i class="fa-solid fa-video"></i> Start Cam</button>
-                                    <button id="share-screen" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-semibold border border-slate-700 transition flex items-center gap-2"><i class="fa-solid fa-desktop"></i> Share Screen</button>
-                                    <button id="stop-stream" class="px-4 py-2 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white rounded-xl text-xs font-semibold border border-red-500/30 transition flex items-center gap-2"><i class="fa-solid fa-circle-stop"></i> Stop</button>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <button id="start-record" class="p-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-xl border border-slate-700 text-xs shadow-sm" title="Record Session"><i class="fa-solid fa-circle text-red-500 mr-1 animate-pulse"></i> Record</button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-950 rounded-2xl border border-slate-800 p-5 shadow-xl">
-                            <div class="flex justify-between items-center mb-4">
-                                <div class="flex items-center gap-2">
-                                    <i class="fa-solid fa-pen-ruler text-blue-500"></i>
-                                    <h3 class="font-semibold text-sm">Interactive Workspace / Canvas</h3>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <input type="color" id="brush-color" class="w-6 h-6 rounded bg-transparent border-0 cursor-pointer" value="#3b82f6">
-                                    <input type="range" id="brush-size" min="1" max="15" value="3" class="w-16 accent-blue-500">
-                                    <button id="clear-board" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 hover:text-slate-200 text-xs rounded-lg transition">Clear All</button>
-                                </div>
-                            </div>
-                            <div class="relative bg-white rounded-xl overflow-hidden">
-                                <canvas id="whiteboard" class="w-full block"></canvas>
-                            </div>
-                        </div>
-
-                    </div>
-
-                    <div class="space-y-6">
-                        
-                        <div class="bg-slate-950 rounded-2xl border border-slate-800 flex flex-col h-[480px] shadow-xl">
-                            <div class="p-4 border-b border-slate-800 flex justify-between items-center bg-slate-950/40">
-                                <h3 class="font-semibold text-sm flex items-center gap-2"><i class="fa-solid fa-comments text-blue-500"></i> Student Live Feed</h3>
-                                <span class="bg-slate-900 text-slate-400 text-[10px] font-mono px-2 py-0.5 rounded border border-slate-800">LaTeX Safe</span>
-                            </div>
-                            <div id="chat-box" class="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar text-sm">
-                                </div>
-                            <div class="p-3 border-t border-slate-800 bg-slate-950/60">
-                                <div class="flex gap-2">
-                                    <input type="text" id="chat-input" placeholder="Type message or standard LaTeX..." class="flex-1 bg-slate-900 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-100 focus:outline-none focus:border-blue-500 placeholder-slate-500 transition">
-                                    <button id="send-btn" class="bg-blue-600 hover:bg-blue-500 text-white rounded-xl px-4 py-2.5 text-xs font-semibold transition flex items-center justify-center shadow-lg shadow-blue-500/20"><i class="fa-solid fa-paper-plane"></i></button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="bg-slate-950 rounded-2xl border border-slate-800 p-5 shadow-xl">
-                            <h3 class="font-semibold text-sm mb-3 flex items-center gap-2"><i class="fa-solid fa-folder-open text-amber-500"></i> Cloud Resources & Syllabus</h3>
-                            <label class="border-2 border-dashed border-slate-800 hover:border-blue-500/50 bg-slate-900/40 hover:bg-slate-900/70 rounded-xl p-4 flex flex-col items-center justify-center gap-2 cursor-pointer transition group mb-4">
-                                <input type="file" id="file-uploader" class="hidden" accept=".pdf,.doc,.docx,image/*">
-                                <i class="fa-solid fa-cloud-arrow-up text-slate-500 group-hover:text-blue-400 text-lg transition"></i>
-                                <span class="text-xs text-slate-400 group-hover:text-slate-300 transition">Drop files here or browse folder</span>
-                            </label>
-                            <ul id="file-list" class="space-y-2 text-xs max-h-40 overflow-y-auto custom-scrollbar">
-                                </ul>
-                        </div>
-
-                    </div>
+        <main class="flex-1 h-full flex flex-col overflow-hidden bg-[#07040f]">
+            
+            <div id="panel-dashboard" class="tab-panel p-6 overflow-y-auto h-full space-y-6">
+                <div>
+                    <h1 class="heading-font font-extrabold text-2xl mb-1">Ecosystem Dashboard</h1>
+                    <p class="text-xs text-[#7a6a9a]">Real-time operational status log updates across Sir Mean core matrix.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl"><i class="fa-solid fa-chart-line"></i></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-5 flex justify-between items-center">
                         <div>
-                            <p class="text-xs text-slate-400">Class Participation</p>
-                            <h4 class="text-2xl font-bold tracking-tight">94.2%</h4>
+                            <p class="text-xs text-[#7a6a9a] mb-1">Your Total Scheduled Sessions</p>
+                            <h3 id="stat-classes-count" class="text-2xl font-bold text-[#7c3aed]">0 Classes</h3>
                         </div>
+                        <div class="p-3 rounded-xl bg-purple-600/10 text-[#7c3aed]"><i class="fa-solid fa-calendar-check text-lg"></i></div>
                     </div>
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-xl"><i class="fa-solid fa-hourglass-half"></i></div>
+                    <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-5 flex justify-between items-center">
                         <div>
-                            <p class="text-xs text-slate-400">Recorded Hours Today</p>
-                            <h4 class="text-2xl font-bold tracking-tight">2.4 hrs</h4>
+                            <p class="text-xs text-[#7a6a9a] mb-1">Ecosystem User Accounts</p>
+                            <h3 id="stat-users-count" class="text-2xl font-bold text-cyan-400">1 User</h3>
                         </div>
+                        <div class="p-3 rounded-xl bg-cyan-600/10 text-cyan-400"><i class="fa-solid fa-users text-lg"></i></div>
                     </div>
-                    <div class="bg-slate-950 border border-slate-800 rounded-2xl p-5 flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl"><i class="fa-solid fa-user-check"></i></div>
+                    <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-5 flex justify-between items-center">
                         <div>
-                            <p class="text-xs text-slate-400">Active Hand Raises</p>
-                            <h4 class="text-2xl font-bold tracking-tight">0</h4>
+                            <p class="text-xs text-[#7a6a9a] mb-1">Primary Discipline Node</p>
+                            <h3 class="text-2xl font-bold text-pink-400">Math / Stat</h3>
                         </div>
+                        <div class="p-3 rounded-xl bg-pink-600/10 text-pink-400"><i class="fa-solid fa-calculator text-lg"></i></div>
+                    </div>
+                    <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-5 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-[#7a6a9a] mb-1">Real-time Stream Engine</p>
+                            <h3 id="stat-stream-status" class="text-2xl font-bold text-emerald-400">Active</h3>
+                        </div>
+                        <div class="p-3 rounded-xl bg-emerald-600/10 text-emerald-400"><i class="fa-solid fa-circle-nodes text-lg"></i></div>
                     </div>
                 </div>
 
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-2 space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-base font-bold heading-font flex items-center gap-2"><i class="fa-solid fa-clock-rotate-left text-[#a78bfa]"></i> Active Upcoming Course Tracks</h2>
+                            <button data-trigger-scheduler class="text-xs font-semibold text-[#a78bfa] hover:underline">View All Schedule Cards</button>
+                        </div>
+                        <div id="dashboard-schedule-feed" class="space-y-3">
+                            </div>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <h2 class="text-base font-bold heading-font"><i class="fa-solid fa-wand-magic-sparkles text-[#a78bfa]"></i> Launch Actions</h2>
+                        <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-5 space-y-3">
+                            <p class="text-xs text-[#7a6a9a] leading-relaxed">Instantly access operational subsystems to run simulations, calculations, or coordinate virtual feeds.</p>
+                            <div class="flex flex-col gap-2">
+                                <button data-jump-tab="scheduler" class="w-full py-2.5 rounded-lg bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                                    <i class="fa-solid fa-calendar-plus"></i> Open Scheduler Module
+                                </button>
+                                <button data-jump-tab="whiteboard" class="w-full py-2.5 rounded-lg bg-purple-950/30 border border-purple-900/30 hover:bg-purple-950/50 text-[#e2d9f3] font-bold text-xs flex items-center justify-center gap-2 transition-all">
+                                    <i class="fa-solid fa-pen-nib"></i> Launch Workspace Canvas
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-scheduler" class="tab-panel p-6 overflow-y-auto h-full hidden space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h1 class="heading-font font-extrabold text-2xl mb-1">Class Scheduler Matrix</h1>
+                        <p class="text-xs text-[#7a6a9a]">Register core structural sessions and generate token links before launch cycles begin.</p>
+                    </div>
+                    <button id="scheduler-host-open-modal-btn" class="hidden px-4 py-2.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs items-center gap-2 transition-all shadow-md">
+                        <i class="fa-solid fa-circle-plus"></i> Schedule New Session Node
+                    </button>
+                    <div id="scheduler-student-notice-badge" class="px-4 py-2.5 rounded-xl bg-blue-950/20 border border-blue-900/40 text-blue-400 font-semibold text-xs flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info"></i> Browse lessons and track generated access link tokens.
+                    </div>
+                </div>
+
+                <div id="scheduler-grid-system" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                    </div>
+            </div>
+
+            <div id="panel-live" class="tab-panel p-6 overflow-y-auto h-full hidden space-y-6">
+                <div class="flex flex-col lg:flex-row items-center justify-between border-b border-purple-900/10 pb-4 gap-4">
+                    <div>
+                        <span class="text-[10px] bg-red-600/20 text-red-400 border border-red-900/40 font-bold px-2.5 py-1 rounded-md tracking-wider uppercase inline-flex items-center gap-1.5 mb-2">
+                            <span class="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse"></span> Streaming Pipeline Node
+                        </span>
+                        <h1 id="live-classroom-header-title" class="heading-font font-extrabold text-2xl text-white">No Active Class Channel Joined</h1>
+                        <p id="live-classroom-header-subject" class="text-xs text-[#7a6a9a] mt-0.5">Initialize or attach validation room keys from the scheduler workspace.</p>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <input id="live-direct-join-code-input" type="text" placeholder="Enter link-token / room-code" class="bg-purple-950/20 border border-purple-900/30 px-3 py-2 text-xs rounded-xl text-white w-48 focus:outline-none focus:border-purple-500">
+                        <button id="live-direct-attach-btn" class="px-4 py-2 bg-[#7c3aed] text-white text-xs font-bold rounded-xl hover:bg-purple-500 transition-all">Attach To Room</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 xl:grid-cols-4 gap-6">
+                    <div class="xl:col-span-3 space-y-4">
+                        <div class="aspect-video bg-[#0d0720] border border-purple-900/20 rounded-2xl relative overflow-hidden flex flex-col items-center justify-center shadow-inner group">
+                            <div id="live-feed-camera-placeholder" class="text-center space-y-3 transition-all duration-300">
+                                <div class="w-16 h-16 rounded-full bg-purple-950/50 border border-purple-900/30 flex items-center justify-center mx-auto text-xl text-purple-400"><i class="fa-solid fa-video-slash"></i></div>
+                                <p class="text-xs text-[#7a6a9a] max-w-xs mx-auto">AV Feed connection currently structural offline. Activate streaming state hardware controllers below.</p>
+                            </div>
+                            
+                            <div id="live-video-simulated-matrix" class="absolute inset-0 bg-gradient-to-br from-indigo-950/20 via-purple-950/40 to-slate-950 hidden flex-col justify-between p-4">
+                                <div class="flex justify-between items-start">
+                                    <span class="bg-purple-900/80 backdrop-blur-md border border-purple-700/30 text-white font-bold text-[10px] px-2.5 py-1 rounded-md flex items-center gap-1.5 uppercase shadow">
+                                        <i class="fa-solid fa-tower-broadcast text-purple-400"></i> <span id="live-sim-badge-identity">Host Feed Output</span>
+                                    </span>
+                                    <span id="live-sim-timer-clock" class="bg-[#07040f]/80 backdrop-blur-md border border-purple-900/20 text-[#a78bfa] font-mono text-xs px-2.5 py-1 rounded-md shadow">00:00:00</span>
+                                </div>
+                                <div class="w-full bg-[#07040f]/40 backdrop-blur-sm rounded-xl p-3 border border-purple-900/10 text-center text-xs font-medium text-purple-300/80 animate-pulse">
+                                    📊 Rendering live multi-variable calculus workspace array transformations...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-4 flex flex-wrap items-center justify-between gap-4">
+                            <div class="flex items-center gap-2">
+                                <button id="ctrl-mic-toggle" class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-900/30 flex items-center justify-center text-xs transition-all hover:bg-purple-600/30"><i class="fa-solid fa-microphone"></i></button>
+                                <button id="ctrl-cam-toggle" class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-900/30 flex items-center justify-center text-xs transition-all hover:bg-purple-600/30"><i class="fa-solid fa-video"></i></button>
+                                <button id="ctrl-screen-toggle" class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-300 border border-purple-900/30 flex items-center justify-center text-xs transition-all hover:bg-purple-600/30"><i class="fa-solid fa-desktop"></i></button>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button id="ctrl-record-toggle" class="px-4 h-10 rounded-xl bg-red-950/30 border border-red-900/40 text-red-400 text-xs font-bold flex items-center gap-2 hover:bg-red-950/50 transition-all"><i class="fa-solid fa-circle"></i> Init Record Node</button>
+                                <button id="ctrl-disconnect-room" class="px-4 h-10 rounded-xl bg-gray-900 border border-purple-900/20 text-[#7a6a9a] text-xs font-bold hover:text-white transition-all">Disconnect Channel</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h2 class="text-sm font-bold heading-font uppercase tracking-wider text-[#a78bfa] flex items-center gap-2"><i class="fa-solid fa-network-wired"></i> Channel Roster (<span id="live-roster-count-val">0</span>)</h2>
+                        <div id="live-roster-feed-stack" class="bg-[#0d0720] border border-purple-900/15 rounded-2xl p-4 space-y-3 max-h-[420px] overflow-y-auto">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-whiteboard" class="tab-panel p-6 flex flex-col h-full hidden space-y-4">
+                <div class="flex items-center justify-between flex-shrink-0">
+                    <div>
+                        <h1 class="heading-font font-extrabold text-2xl mb-1">Interactive Board Matrix</h1>
+                        <p class="text-xs text-[#7a6a9a]">Draw formulas and model layouts directly inside this synchronized rendering window frame.</p>
+                    </div>
+                    <button id="wb-clear-btn" class="px-3 py-1.5 rounded-lg bg-purple-950/30 border border-purple-900/40 hover:bg-purple-900/20 text-xs font-semibold text-purple-300 transition-all">Clear Canvas Node</button>
+                </div>
+
+                <div class="flex-1 w-full bg-[#0f0a1e] border border-purple-900/20 rounded-2xl relative overflow-hidden shadow-inner flex">
+                    <canvas id="whiteboard-canvas" class="w-full h-full block"></canvas>
+                    
+                    <div class="absolute left-4 top-4 bg-[#0d0720]/90 backdrop-blur-md border border-purple-900/30 p-3 rounded-xl flex flex-col gap-3 shadow-2xl z-10">
+                        <div class="flex flex-col gap-1.5">
+                            <button data-tool="pen" class="wb-tool-btn w-8 h-8 rounded-lg bg-purple-600 text-white flex items-center justify-center text-xs shadow"><i class="fa-solid fa-pen"></i></button>
+                            <button data-tool="eraser" class="wb-tool-btn w-8 h-8 rounded-lg bg-transparent text-[#7a6a9a] hover:bg-purple-950/30 flex items-center justify-center text-xs"><i class="fa-solid fa-eraser"></i></button>
+                        </div>
+                        <div class="w-full h-[1px] bg-purple-900/20"></div>
+                        <div class="flex flex-col gap-2" id="wb-color-palette-stack">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="panel-math-editor" class="tab-panel p-6 overflow-y-auto h-full hidden space-y-6">
+                <div>
+                    <h1 class="heading-font font-extrabold text-2xl mb-1">Discipline Equation Matrix Renderer</h1>
+                    <p class="text-xs text-[#7a6a9a]">Compile statistical frameworks, regression bounds, and multi-variable logic structures securely using standard LaTeX parsing arrays.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-4">
+                        <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-5 space-y-4">
+                            <h2 class="text-sm font-bold text-white tracking-wide">LaTeX Syntax Stream Input</h2>
+                            <div>
+                                <textarea id="latex-string-input-buffer" rows="6" class="w-full bg-[#07040f] border border-purple-900/30 rounded-xl p-4 font-mono text-sm text-purple-300 focus:outline-none focus:border-purple-500 transition-all leading-relaxed" placeholder="Type standard formula expressions here..."></textarea>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-[11px] text-[#6b5a8a] font-medium">Quick Insertion Macros Snippets:</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button data-macro="mean" class="math-macro-btn px-2.5 py-1 text-[10px] bg-purple-950/40 border border-purple-900/30 rounded-md text-purple-300 hover:bg-purple-900/30 font-mono">Sample Mean ($\bar{X}$)</button>
+                                    <button data-macro="variance" class="math-macro-btn px-2.5 py-1 text-[10px] bg-purple-950/40 border border-purple-900/30 rounded-md text-purple-300 hover:bg-purple-900/30 font-mono">Variance ($\sigma^2$)</button>
+                                    <button data-macro="quadratic" class="math-macro-btn px-2.5 py-1 text-[10px] bg-purple-950/40 border border-purple-900/30 rounded-md text-purple-300 hover:bg-purple-900/30 font-mono">Quadratic Formula</button>
+                                    <button data-macro="normal" class="math-macro-btn px-2.5 py-1 text-[10px] bg-purple-950/40 border border-purple-900/30 rounded-md text-purple-300 hover:bg-purple-900/30 font-mono">Normal Distribution PDF</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="bg-[#0d0720] border border-purple-900/15 rounded-xl p-5 flex flex-col h-full min-h-[320px]">
+                            <h2 class="text-sm font-bold text-white tracking-wide mb-4">Real-time Formatted Structural Output Display</h2>
+                            <div id="latex-rendered-viewport" class="flex-1 w-full bg-[#07040f] border border-purple-900/20 rounded-xl p-6 flex flex-col items-center justify-center text-center overflow-auto">
+                                </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
     </div>
 
-    <script type="module" src="app.js"></script>
+    <div id="scheduler-create-modal" class="fixed inset-0 z-50 bg-[#07040f]/80 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="w-full max-w-lg bg-[#0d0720] border border-purple-900/40 rounded-2xl shadow-2xl p-6 space-y-4 animate-scale-up">
+            <div class="flex items-center justify-between border-b border-purple-900/10 pb-3">
+                <h3 class="heading-font font-extrabold text-lg text-white">Schedule Advanced Academic Session</h3>
+                <button id="scheduler-modal-close-btn" class="w-7 h-7 rounded-lg hover:bg-purple-950/40 text-[#7a6a9a] hover:text-white flex items-center justify-center"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-[#a78bfa] mb-1.5">Class / Topic Title</label>
+                    <input id="form-class-title" type="text" placeholder="Introduction to Linear Regression Analysis" class="w-full bg-[#07040f] border border-purple-900/30 rounded-xl px-4 py-3 text-xs text-white focus:outline-none focus:border-purple-500">
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-[#a78bfa] mb-1.5">Core Academic Subject Discipline</label>
+                        <select id="form-class-subject" class="w-full bg-[#07040f] border border-purple-900/30 rounded-xl px-4 py-3 text-xs text-[#e2d9f3] focus:outline-none focus:border-purple-500">
+                            <option value="Mathematics">Mathematics</option>
+                            <option value="Statistics">Statistics</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Economics">Economics</option>
+                            <option value="Data Science Core">Data Science Core</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-[#a78bfa] mb-1.5">Launch Time Coordinates</label>
+                        <input id="form-class-datetime" type="datetime-local" class="w-full bg-[#07040f] border border-purple-900/30 rounded-xl px-4 py-3 text-xs text-[#e2d9f3] focus:outline-none focus:border-purple-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-[#a78bfa] mb-1.5">Session Overview Summary Target</label>
+                    <textarea id="form-class-desc" rows="3" placeholder="Provide details on prerequisites, required matrix readings, etc..." class="w-full bg-[#07040f] border border-purple-900/30 rounded-xl p-4 text-xs text-white focus:outline-none focus:border-purple-500"></textarea>
+                </div>
+
+                <div class="pt-2">
+                    <button id="form-scheduler-submit-btn" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#7c3aed] to-[#a78bfa] text-white font-bold text-xs shadow-lg shadow-purple-900/40 hover:brightness-110 transition-all">
+                        Validate and Commit Session Node
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
 </body>
 </html>
